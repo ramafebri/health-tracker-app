@@ -3,6 +3,7 @@ package com.rama.health.ui.dashboard
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rama.health.domain.usecase.ObserveDailyGoalUseCase
+import com.rama.health.domain.usecase.ObserveTrackingEnabledUseCase
 import com.rama.health.domain.usecase.ObserveTodayStepsUseCase
 import com.rama.health.domain.usecase.SetDailyGoalUseCase
 import com.rama.health.domain.usecase.SetTrackingEnabledUseCase
@@ -20,6 +21,7 @@ import javax.inject.Inject
 class DashboardViewModel @Inject constructor(
     observeTodaySteps: ObserveTodayStepsUseCase,
     observeDailyGoal: ObserveDailyGoalUseCase,
+    observeTrackingEnabled: ObserveTrackingEnabledUseCase,
     private val setDailyGoal: SetDailyGoalUseCase,
     private val setTrackingEnabled: SetTrackingEnabledUseCase,
 ) : ViewModel() {
@@ -31,14 +33,15 @@ class DashboardViewModel @Inject constructor(
     val uiState: StateFlow<DashboardUiState> = combine(
         observeTodaySteps(),
         observeDailyGoal(),
+        observeTrackingEnabled(),
         permissionState,
-    ) { todaySteps: Int, dailyGoal: Int, permissions: PermissionState ->
+    ) { todaySteps: Int, dailyGoal: Int, trackingEnabled: Boolean, permissions: PermissionState ->
         DashboardUiState(
             todaySteps = todaySteps,
             dailyGoal = dailyGoal,
             hasActivityRecognitionPermission = permissions.hasActivityRecognitionPermission,
             hasNotificationPermission = permissions.hasNotificationPermission,
-            isTrackingActive = permissions.hasActivityRecognitionPermission,
+            isTrackingActive = trackingEnabled,
         )
     }.stateIn(
         scope = viewModelScope,

@@ -9,6 +9,7 @@ import com.rama.health.util.PermissionUtils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,12 +23,13 @@ import javax.inject.Inject
 class BootCompletedReceiver : BroadcastReceiver() {
 
     @Inject lateinit var stepPreferencesDataSource: StepPreferencesDataSource
+    private val receiverScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Intent.ACTION_BOOT_COMPLETED) return
 
         val pendingResult = goAsync()
-        CoroutineScope(Dispatchers.IO).launch {
+        receiverScope.launch {
             try {
                 val wasTrackingEnabled = stepPreferencesDataSource.trackingEnabled.first()
                 val hasPermission = PermissionUtils.hasActivityRecognitionPermission(context)

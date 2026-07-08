@@ -6,6 +6,7 @@ import com.rama.health.data.local.datastore.StepPreferencesDataSource
 import com.rama.health.data.local.db.DailyStepsDao
 import com.rama.health.data.local.db.DailyStepsEntity
 import com.rama.health.domain.model.DailyStepRecord
+import com.rama.health.domain.util.LocalDateFormats
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -13,6 +14,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import java.time.LocalDate
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -39,12 +41,13 @@ class StepRepositoryImplTest {
         coEvery { dao.upsert(any()) } just Runs
         coEvery { prefs.setBaseline(any(), any(), any()) } just Runs
 
-        repository().onSensorReading(cumulativeCount, today)
+        val todaySteps = repository().onSensorReading(cumulativeCount, today)
 
         // With no prior baseline, the current reading itself becomes the baseline, so today's
         // steps correctly start at zero (there is no earlier reading to diff against yet).
         coVerify { prefs.setBaseline(cumulativeCount, today, 0) }
         coVerify { dao.upsert(DailyStepsEntity(date = today.toString(), steps = 0)) }
+        assertEquals(0, todaySteps)
     }
 
     @Test
@@ -59,10 +62,11 @@ class StepRepositoryImplTest {
         coEvery { dao.upsert(any()) } just Runs
         coEvery { prefs.setBaseline(any(), any(), any()) } just Runs
 
-        repository().onSensorReading(cumulativeCount = 1500L, timestamp = today)
+        val todaySteps = repository().onSensorReading(cumulativeCount = 1500L, timestamp = today)
 
         coVerify { dao.upsert(DailyStepsEntity(date = today.toString(), steps = 500)) }
         coVerify { prefs.setBaseline(baselineValue, today, 0) }
+        assertEquals(500, todaySteps)
     }
 
     @Test
@@ -79,11 +83,12 @@ class StepRepositoryImplTest {
         coEvery { prefs.setBaseline(any(), any(), any()) } just Runs
 
         // Computes todaySteps = 1200 - 1000 = 200, which is lower than the 800 already stored.
-        repository().onSensorReading(cumulativeCount = 1200L, timestamp = today)
+        val todaySteps = repository().onSensorReading(cumulativeCount = 1200L, timestamp = today)
 
         // Stale reading is dropped entirely: no DAO write, no baseline write.
         coVerify(exactly = 0) { dao.upsert(any()) }
         coVerify(exactly = 0) { prefs.setBaseline(any(), any(), any()) }
+        assertEquals(800, todaySteps)
     }
 
     @Test
@@ -98,10 +103,11 @@ class StepRepositoryImplTest {
         coEvery { dao.upsert(any()) } just Runs
         coEvery { prefs.setBaseline(any(), any(), any()) } just Runs
 
-        repository().onSensorReading(cumulativeCount = 150L, timestamp = today)
+        val todaySteps = repository().onSensorReading(cumulativeCount = 150L, timestamp = today)
 
         coVerify { dao.upsert(DailyStepsEntity(date = today.toString(), steps = 800)) }
         coVerify { prefs.setBaseline(150L, today, 800) }
+        assertEquals(800, todaySteps)
     }
 
     @Test
@@ -116,10 +122,11 @@ class StepRepositoryImplTest {
         coEvery { dao.upsert(any()) } just Runs
         coEvery { prefs.setBaseline(any(), any(), any()) } just Runs
 
-        repository().onSensorReading(cumulativeCount = 170L, timestamp = today)
+        val todaySteps = repository().onSensorReading(cumulativeCount = 170L, timestamp = today)
 
         coVerify { dao.upsert(DailyStepsEntity(date = today.toString(), steps = 820)) }
         coVerify { prefs.setBaseline(150L, today, 800) }
+        assertEquals(820, todaySteps)
     }
 
     @Test
@@ -148,8 +155,9 @@ class StepRepositoryImplTest {
         val persistedSteps = 2500
         // observeTodaySteps() seeds via dao.getByDate(LocalDate.now().toString()) internally,
         // so the stub must key off the same expression rather than a hardcoded date string.
-        coEvery { dao.getByDate(LocalDate.now().toString()) } returns
-            DailyStepsEntity(date = LocalDate.now().toString(), steps = persistedSteps)
+        val todayStorageDate = LocalDateFormats.toStorageString(LocalDate.now())
+        coEvery { dao.getByDate(todayStorageDate) } returns
+            DailyStepsEntity(date = todayStorageDate, steps = persistedSteps)
 
         repository().observeTodaySteps().test {
             // The underlying MutableStateFlow never completes, so we cancel instead of
@@ -173,5 +181,11 @@ class StepRepositoryImplTest {
         coEvery { prefs.setTrackingEnabled(any()) } just Runs
         repository().setTrackingEnabled(true)
         coVerify { prefs.setTrackingEnabled(true) }
+    }
+
+    @Test
+    fun observeTrackingEnabled_delegatesToPreferencesFlow() = runTest {
+        every { prefs.trackingEnabled } returns flowOf(true)
+        assertEquals(true, repository().observeTrackingEnabled().first())
     }
 }

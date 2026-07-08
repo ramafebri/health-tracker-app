@@ -12,12 +12,13 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import com.rama.health.domain.repository.StepRepository
+import com.rama.health.util.PermissionUtils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
@@ -38,6 +39,8 @@ class StepCounterService : Service(), SensorEventListener {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var usingStepDetectorFallback = false
     private var detectorCumulativeCount = 0L
+    @Volatile private var cachedDailyGoal = DEFAULT_GOAL_PLACEHOLDER
+    private var isGoalObservationStarted = false
 
     override fun onCreate() {
         super.onCreate()
@@ -56,10 +59,15 @@ class StepCounterService : Service(), SensorEventListener {
             startForeground(StepCounterNotificationHelper.NOTIFICATION_ID, initialNotification)
         }
 
+        ensureGoalObservationStarted()
         registerSensorListener()
     }
 
     private fun registerSensorListener() {
+        if (!PermissionUtils.hasActivityRecognitionPermission(this)) {
+            Log.w(TAG, "ACTIVITY_RECOGNITION permission missing; skipping sensor registration")
+            return
+        }
         val stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
         if (stepCounterSensor != null) {
             usingStepDetectorFallback = false
@@ -98,6 +106,7 @@ class StepCounterService : Service(), SensorEventListener {
     }
 
     override fun onSensorChanged(event: SensorEvent) {
+        ensureGoalObservationStarted()
         val cumulativeCount = if (usingStepDetectorFallback) {
             // TYPE_STEP_DETECTOR fires exactly once per step (values[0] is always 1f), so we
             // maintain our own running cumulative counter to feed the same baseline-diffing
@@ -110,15 +119,23 @@ class StepCounterService : Service(), SensorEventListener {
 
         val today = LocalDate.now()
         serviceScope.launch {
-            stepRepository.onSensorReading(cumulativeCount, today)
-            refreshNotification()
+            val todaySteps = stepRepository.onSensorReading(cumulativeCount, today)
+            refreshNotification(todaySteps)
         }
     }
 
-    private suspend fun refreshNotification() {
-        val todaySteps = stepRepository.observeTodaySteps().first()
-        val goal = stepRepository.observeDailyGoal().first()
-        val notification = notificationHelper.buildNotification(todaySteps, goal)
+    private fun ensureGoalObservationStarted() {
+        if (isGoalObservationStarted) return
+        isGoalObservationStarted = true
+        serviceScope.launch {
+            stepRepository.observeDailyGoal().collect { goal ->
+                cachedDailyGoal = goal
+            }
+        }
+    }
+
+    private suspend fun refreshNotification(todaySteps: Int) {
+        val notification = notificationHelper.buildNotification(todaySteps, cachedDailyGoal)
         notificationManager.notify(StepCounterNotificationHelper.NOTIFICATION_ID, notification)
     }
 

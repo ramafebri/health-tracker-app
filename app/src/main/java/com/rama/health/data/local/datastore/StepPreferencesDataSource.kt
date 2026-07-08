@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
+import com.rama.health.domain.util.LocalDateFormats
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
@@ -49,7 +50,7 @@ class StepPreferencesDataSource @Inject constructor(
         val dateStr = prefs[Keys.BASELINE_DATE]
         val offsetSteps = prefs[Keys.BASELINE_OFFSET_STEPS] ?: 0
         if (value != null && dateStr != null) {
-            PersistedBaseline(value, LocalDate.parse(dateStr), offsetSteps)
+            PersistedBaseline(value, LocalDateFormats.parseStorageString(dateStr), offsetSteps)
         } else {
             null
         }
@@ -58,7 +59,7 @@ class StepPreferencesDataSource @Inject constructor(
     suspend fun setBaseline(value: Long, date: LocalDate, offsetSteps: Int) {
         context.dataStore.edit {
             it[Keys.BASELINE_VALUE] = value
-            it[Keys.BASELINE_DATE] = date.toString()
+            it[Keys.BASELINE_DATE] = LocalDateFormats.toStorageString(date)
             it[Keys.BASELINE_OFFSET_STEPS] = offsetSteps
         }
     }

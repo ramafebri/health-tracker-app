@@ -3,6 +3,7 @@ package com.rama.health.ui.dashboard
 import app.cash.turbine.test
 import com.rama.health.MainDispatcherRule
 import com.rama.health.domain.usecase.ObserveDailyGoalUseCase
+import com.rama.health.domain.usecase.ObserveTrackingEnabledUseCase
 import com.rama.health.domain.usecase.ObserveTodayStepsUseCase
 import com.rama.health.domain.usecase.SetDailyGoalUseCase
 import com.rama.health.domain.usecase.SetTrackingEnabledUseCase
@@ -31,16 +32,24 @@ class DashboardViewModelTest {
 
     private val observeTodaySteps = mockk<ObserveTodayStepsUseCase>()
     private val observeDailyGoal = mockk<ObserveDailyGoalUseCase>()
+    private val observeTrackingEnabled = mockk<ObserveTrackingEnabledUseCase>()
     private val setDailyGoal = mockk<SetDailyGoalUseCase>()
     private val setTrackingEnabled = mockk<SetTrackingEnabledUseCase>()
 
     private fun viewModel() =
-        DashboardViewModel(observeTodaySteps, observeDailyGoal, setDailyGoal, setTrackingEnabled)
+        DashboardViewModel(
+            observeTodaySteps,
+            observeDailyGoal,
+            observeTrackingEnabled,
+            setDailyGoal,
+            setTrackingEnabled,
+        )
 
     @Test
     fun uiState_combinesStepsAndGoalFromUseCases() = runTest {
         every { observeTodaySteps() } returns MutableStateFlow(1500)
         every { observeDailyGoal() } returns MutableStateFlow(8_000)
+        every { observeTrackingEnabled() } returns MutableStateFlow(false)
 
         viewModel().uiState.test {
             // stateIn's initialValue (defaults) is emitted first, before the combine of the
@@ -60,6 +69,7 @@ class DashboardViewModelTest {
     fun onGoalChanged_invokesSetDailyGoalUseCaseWithNewGoal() = runTest {
         every { observeTodaySteps() } returns MutableStateFlow(1500)
         every { observeDailyGoal() } returns MutableStateFlow(8_000)
+        every { observeTrackingEnabled() } returns MutableStateFlow(false)
         coEvery { setDailyGoal(any()) } just Runs
 
         val vm = viewModel()
@@ -75,9 +85,10 @@ class DashboardViewModelTest {
     }
 
     @Test
-    fun onPermissionsChecked_updatesPermissionAndTrackingFields() = runTest {
+    fun onPermissionsChecked_updatesPermissionFields_only() = runTest {
         every { observeTodaySteps() } returns MutableStateFlow(1500)
         every { observeDailyGoal() } returns MutableStateFlow(8_000)
+        every { observeTrackingEnabled() } returns MutableStateFlow(false)
 
         val vm = viewModel()
         vm.uiState.test {
@@ -89,21 +100,36 @@ class DashboardViewModelTest {
             val updated = awaitItem()
             assertTrue(updated.hasActivityRecognitionPermission)
             assertFalse(updated.hasNotificationPermission)
-            // isTrackingActive mirrors activity recognition permission per the implementation.
-            assertTrue(updated.isTrackingActive)
+            assertFalse(updated.isTrackingActive)
 
             cancelAndIgnoreRemainingEvents()
         }
 
         assertTrue(vm.uiState.value.hasActivityRecognitionPermission)
         assertFalse(vm.uiState.value.hasNotificationPermission)
-        assertTrue(vm.uiState.value.isTrackingActive)
+        assertFalse(vm.uiState.value.isTrackingActive)
+    }
+
+    @Test
+    fun uiState_usesTrackingEnabledFlowForTrackingState() = runTest {
+        every { observeTodaySteps() } returns MutableStateFlow(1500)
+        every { observeDailyGoal() } returns MutableStateFlow(8_000)
+        every { observeTrackingEnabled() } returns MutableStateFlow(true)
+
+        viewModel().uiState.test {
+            skipItems(1)
+
+            val state = awaitItem()
+            assertTrue(state.isTrackingActive)
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
     fun onTrackingStarted_invokesSetTrackingEnabledUseCaseWithTrue() = runTest {
         every { observeTodaySteps() } returns MutableStateFlow(1500)
         every { observeDailyGoal() } returns MutableStateFlow(8_000)
+        every { observeTrackingEnabled() } returns MutableStateFlow(false)
         coEvery { setTrackingEnabled(any()) } just Runs
 
         val vm = viewModel()

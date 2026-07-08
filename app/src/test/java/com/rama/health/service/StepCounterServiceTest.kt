@@ -1,11 +1,15 @@
 package com.rama.health.service
 
+import android.Manifest
+import android.app.Application
 import android.app.NotificationManager
 import android.app.Service
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorManager
+import androidx.test.core.app.ApplicationProvider
 import com.rama.health.domain.repository.StepRepository
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
@@ -20,6 +24,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 
 /**
  * Unit tests for [StepCounterService]. The service is [dagger.hilt.android.AndroidEntryPoint],
@@ -75,6 +80,8 @@ class StepCounterServiceTest {
         sensorManager = mockk(relaxed = true)
         notificationManager = mockk(relaxed = true)
         notificationHelper = mockk(relaxed = true)
+        shadowOf(ApplicationProvider.getApplicationContext<Application>())
+            .grantPermissions(Manifest.permission.ACTIVITY_RECOGNITION)
     }
 
     @Test
@@ -115,6 +122,18 @@ class StepCounterServiceTest {
     }
 
     @Test
+    fun registerSensorListener_doesNothing_whenActivityRecognitionPermissionMissing() {
+        shadowOf(ApplicationProvider.getApplicationContext<Application>())
+            .denyPermissions(Manifest.permission.ACTIVITY_RECOGNITION)
+        every { sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) } returns mockk()
+
+        val service = buildService()
+        invokeRegisterSensorListener(service)
+
+        verify(exactly = 0) { sensorManager.registerListener(any(), any<Sensor>(), any<Int>()) }
+    }
+
+    @Test
     fun onSensorChanged_stepCounterMode_forwardsCumulativeValueToRepository() {
         val service = buildService()
 
@@ -141,11 +160,14 @@ class StepCounterServiceTest {
 
     @Test
     fun onSensorChanged_refreshesNotificationWithLatestTotals() {
-        every { stepRepository.observeTodaySteps() } returns flowOf(4200)
         every { stepRepository.observeDailyGoal() } returns flowOf(8000)
+        coEvery { stepRepository.onSensorReading(any(), any()) } returns 4200
         every { notificationHelper.buildNotification(any(), any()) } returns mockk(relaxed = true)
 
         val service = buildService()
+        val goalField = StepCounterService::class.java.getDeclaredField("cachedDailyGoal")
+        goalField.isAccessible = true
+        goalField.setInt(service, 8000)
         service.onSensorChanged(newSensorEvent(4200f))
 
         verify(timeout = 2_000) { notificationHelper.buildNotification(4200, 8000) }

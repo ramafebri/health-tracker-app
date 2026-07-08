@@ -44,6 +44,13 @@ class StepUseCasesTest {
     }
 
     @Test
+    fun observeTrackingEnabled_delegatesToRepository() = runTest {
+        every { repository.observeTrackingEnabled() } returns flowOf(true)
+        val useCase = ObserveTrackingEnabledUseCase(repository)
+        assertEquals(true, useCase().first())
+    }
+
+    @Test
     fun setDailyGoal_delegatesToRepository() = runTest {
         coEvery { repository.setDailyGoal(any()) } returns Unit
         val useCase = SetDailyGoalUseCase(repository)

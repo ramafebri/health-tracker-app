@@ -6,6 +6,7 @@ import com.rama.health.data.local.db.DailyStepsDao
 import com.rama.health.data.local.db.DailyStepsEntity
 import com.rama.health.domain.model.DailyStepRecord
 import com.rama.health.domain.repository.StepRepository
+import com.rama.health.domain.util.LocalDateFormats
 import com.rama.health.domain.util.StepBaselineCalculator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,16 +45,17 @@ class StepRepositoryImpl @Inject constructor(
 
     override fun observeHistory(): Flow<List<DailyStepRecord>> =
         dao.observeAll().map { entities ->
-            entities.map { DailyStepRecord(date = LocalDate.parse(it.date), steps = it.steps) }
+            entities.map { DailyStepRecord(date = LocalDateFormats.parseStorageString(it.date), steps = it.steps) }
         }
 
     override fun observeDailyGoal(): Flow<Int> = prefs.dailyGoal
+    override fun observeTrackingEnabled(): Flow<Boolean> = prefs.trackingEnabled
 
     override suspend fun setDailyGoal(goal: Int) = prefs.setDailyGoal(goal)
 
-    override suspend fun onSensorReading(cumulativeCount: Long, timestamp: LocalDate) {
-        sensorReadingMutex.withLock {
-            val existing = dao.getByDate(timestamp.toString())
+    override suspend fun onSensorReading(cumulativeCount: Long, timestamp: LocalDate): Int {
+        return sensorReadingMutex.withLock {
+            val existing = dao.getByDate(LocalDateFormats.toStorageString(timestamp))
             val existingSteps = existing?.steps ?: 0
 
             val persistedBaseline = prefs.baseline.first()
@@ -73,11 +75,17 @@ class StepRepositoryImpl @Inject constructor(
             // persisted total with a lower value than what's already stored for the same day.
             // Bail out entirely (don't touch the baseline either) rather than partially apply a
             // stale reading, so persisted state never drifts out of sync with what's displayed.
-            if (existingSteps > result.todaySteps) return@withLock
+            if (existingSteps > result.todaySteps) return@withLock existingSteps
 
-            dao.upsert(DailyStepsEntity(date = timestamp.toString(), steps = result.todaySteps))
+            dao.upsert(
+                DailyStepsEntity(
+                    date = LocalDateFormats.toStorageString(timestamp),
+                    steps = result.todaySteps,
+                ),
+            )
             prefs.setBaseline(result.newBaselineValue, result.newBaselineDate, result.newBaselineOffsetSteps)
             todayStepsFlow.value = result.todaySteps
+            result.todaySteps
         }
     }
 
@@ -89,7 +97,8 @@ class StepRepositoryImpl @Inject constructor(
         if (todayStepsFlow.value != null) return
         seedMutex.withLock {
             if (todayStepsFlow.value == null) {
-                todayStepsFlow.value = dao.getByDate(LocalDate.now().toString())?.steps ?: 0
+                todayStepsFlow.value =
+                    dao.getByDate(LocalDateFormats.toStorageString(LocalDate.now()))?.steps ?: 0
             }
         }
     }

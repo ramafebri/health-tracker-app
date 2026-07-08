@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.rama.health.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -32,7 +33,7 @@ class StepCounterNotificationHelper @Inject constructor(
         return NotificationCompat.Builder(context, CHANNEL_ID)
             .setContentTitle("Tracking your steps")
             .setContentText(progressText)
-            .setSmallIcon(android.R.drawable.ic_menu_compass) // TODO: replace with a dedicated app icon asset
+            .setSmallIcon(R.drawable.ic_notification_steps)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)

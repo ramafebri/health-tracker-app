@@ -124,6 +124,12 @@ fun DashboardContent(
                 goal = uiState.dailyGoal,
             )
 
+            Text(
+                text = if (uiState.isTrackingActive) "Tracking active" else "Tracking paused",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     text = "Daily Goal",
@@ -164,6 +170,7 @@ private fun DashboardContentPreview() {
                 dailyGoal = 10_000,
                 hasActivityRecognitionPermission = true,
                 hasNotificationPermission = true,
+                isTrackingActive = true,
             ),
             onGrantPermissionClick = {},
             onGoalChanged = {},
@@ -182,6 +189,7 @@ private fun DashboardContentPermissionsMissingPreview() {
                 dailyGoal = 10_000,
                 hasActivityRecognitionPermission = false,
                 hasNotificationPermission = false,
+                isTrackingActive = false,
             ),
             onGrantPermissionClick = {},
             onGoalChanged = {},

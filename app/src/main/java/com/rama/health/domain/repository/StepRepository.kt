@@ -13,6 +13,7 @@ interface StepRepository {
     fun observeTodaySteps(): Flow<Int>
     fun observeHistory(): Flow<List<DailyStepRecord>>
     fun observeDailyGoal(): Flow<Int>
+    fun observeTrackingEnabled(): Flow<Boolean>
     suspend fun setDailyGoal(goal: Int)
 
     /**
@@ -23,7 +24,7 @@ interface StepRepository {
      * serialized internally, since sensor callbacks can arrive faster than a single
      * read-compute-write cycle completes.
      */
-    suspend fun onSensorReading(cumulativeCount: Long, timestamp: LocalDate)
+    suspend fun onSensorReading(cumulativeCount: Long, timestamp: LocalDate): Int
 
     /**
      * The cumulative hardware reading recorded in the last persisted baseline, or null if no
