@@ -1,0 +1,22 @@
+package com.rama.health.di
+
+import android.app.NotificationManager
+import android.content.Context
+import android.hardware.SensorManager
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+
+@Module
+@InstallIn(SingletonComponent::class)
+object SystemServiceModule {
+    @Provides
+    fun provideSensorManager(@ApplicationContext context: Context): SensorManager =
+        context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+
+    @Provides
+    fun provideNotificationManager(@ApplicationContext context: Context): NotificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+}
