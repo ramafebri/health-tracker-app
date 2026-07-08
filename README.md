@@ -79,3 +79,7 @@ cd health-tracker-app
 ```
 
 Alternatively, open the project in Android Studio and use the built-in Run/Test actions.
+
+## License
+
+Licensed under the [Apache License, Version 2.0](LICENSE).
