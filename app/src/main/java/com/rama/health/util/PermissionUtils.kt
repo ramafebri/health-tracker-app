@@ -34,4 +34,31 @@ object PermissionUtils {
         }
         return permissions.toTypedArray()
     }
+
+    fun hasFineLocationPermission(context: Context): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    fun hasCoarseLocationPermission(context: Context): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    fun hasWorkoutTrackingPermissions(context: Context): Boolean {
+        return hasFineLocationPermission(context) &&
+            hasPostNotificationsPermission(context)
+    }
+
+    fun requiredWorkoutRuntimePermissions(): Array<String> {
+        return arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.POST_NOTIFICATIONS,
+        )
+    }
 }

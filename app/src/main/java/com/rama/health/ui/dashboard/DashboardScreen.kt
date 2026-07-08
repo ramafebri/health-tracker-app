@@ -41,6 +41,7 @@ import com.rama.health.util.PermissionUtils
 fun DashboardScreen(
     viewModel: DashboardViewModel = hiltViewModel(),
     onNavigateToHistory: () -> Unit,
+    onNavigateToWorkouts: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -87,6 +88,7 @@ fun DashboardScreen(
         onGrantPermissionClick = { permissionLauncher.launch(PermissionUtils.requiredRuntimePermissions()) },
         onGoalChanged = viewModel::onGoalChanged,
         onNavigateToHistory = onNavigateToHistory,
+        onNavigateToWorkouts = onNavigateToWorkouts,
     )
 }
 
@@ -97,6 +99,7 @@ fun DashboardContent(
     onGrantPermissionClick: () -> Unit,
     onGoalChanged: (Int) -> Unit,
     onNavigateToHistory: () -> Unit,
+    onNavigateToWorkouts: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var goalInput by remember(uiState.dailyGoal) { mutableStateOf(uiState.dailyGoal.toString()) }
@@ -156,6 +159,13 @@ fun DashboardContent(
             ) {
                 Text("View History")
             }
+
+            TextButton(
+                onClick = onNavigateToWorkouts,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Workout Logger")
+            }
         }
     }
 }
@@ -175,6 +185,7 @@ private fun DashboardContentPreview() {
             onGrantPermissionClick = {},
             onGoalChanged = {},
             onNavigateToHistory = {},
+            onNavigateToWorkouts = {},
         )
     }
 }
@@ -194,6 +205,7 @@ private fun DashboardContentPermissionsMissingPreview() {
             onGrantPermissionClick = {},
             onGoalChanged = {},
             onNavigateToHistory = {},
+            onNavigateToWorkouts = {},
         )
     }
 }

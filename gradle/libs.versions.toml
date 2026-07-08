@@ -21,6 +21,9 @@ robolectric = "4.15.1"
 errorProneAnnotations = "2.36.0"
 androidxTestCore = "1.7.0"
 desugarJdkLibs = "2.1.5"
+playServicesLocation = "21.3.0"
+playServicesMaps = "19.0.0"
+mapsCompose = "6.4.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -59,6 +62,9 @@ robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "
 error-prone-annotations = { group = "com.google.errorprone", name = "error_prone_annotations", version.ref = "errorProneAnnotations" }
 androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidxTestCore" }
 desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugarJdkLibs" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
+maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "mapsCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

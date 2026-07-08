@@ -1,13 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample backup rules file; uncomment and customize as necessary.
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Excludes GPS workout routes and in-progress session state from Android Auto Backup.
    See https://developer.android.com/guide/topics/data/autobackup
-   for details.
-   Note: This file is ignored for devices older than API 31
-   See https://developer.android.com/about/versions/12/backup-restore
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <exclude domain="database" path="health_tracker.db" />
+    <exclude domain="database" path="health_tracker.db-shm" />
+    <exclude domain="database" path="health_tracker.db-wal" />
+    <exclude domain="file" path="datastore/workout_prefs.preferences_pb" />
 </full-backup-content>
