@@ -1,3 +1,90 @@
 <resources>
     <string name="app_name">HealthTrackerApp</string>
+
+    <!-- Reminder notification channel -->
+    <string name="reminder_channel_name">Health Reminders</string>
+    <string name="reminder_channel_description">Water and medication reminder notifications</string>
+
+    <!-- Reminder notifications -->
+    <string name="reminder_water_title">Time to drink water</string>
+    <string name="reminder_water_body">Stay hydrated throughout the day.</string>
+    <string name="reminder_medication_title">Medication reminder: %1$s</string>
+    <string name="reminder_medication_body">Take %1$s</string>
+    <string name="reminder_medication_body_with_dosage">Take %1$s — %2$s</string>
+
+    <!-- Reminders hub -->
+    <string name="reminders_hub_title">Reminders</string>
+    <string name="reminders_hub_water_card_title">Water reminders</string>
+    <string name="reminders_hub_water_card_subtitle">Stay hydrated with scheduled nudges</string>
+    <string name="reminders_hub_medication_card_title">Medication reminders</string>
+    <string name="reminders_hub_medication_card_subtitle">Never miss a dose</string>
+    <string name="reminders_hub_water_empty">Water reminders are off. Tap to set up your schedule.</string>
+    <string name="reminders_hub_medication_empty">No medications yet. Tap to add your first reminder.</string>
+
+    <!-- Reminder permission banners -->
+    <string name="reminder_notification_permission_title">Notifications are turned off</string>
+    <string name="reminder_notification_permission_message">Enable notifications so water and medication reminders can alert you on time.</string>
+    <string name="reminder_notification_permission_action">Enable notifications</string>
+    <string name="reminder_exact_alarm_permission_title">Exact alarms not allowed</string>
+    <string name="reminder_exact_alarm_permission_message">Allow exact alarms so reminders fire at the scheduled time, even when the app is in the background.</string>
+    <string name="reminder_exact_alarm_permission_action">Allow exact alarms</string>
+
+    <!-- Water reminder screen -->
+    <string name="water_reminder_title">Water reminders</string>
+    <string name="water_reminder_enabled_label">Enable water reminders</string>
+    <string name="water_reminder_schedule_mode_label">Schedule mode</string>
+    <string name="water_reminder_schedule_mode_interval">Every interval</string>
+    <string name="water_reminder_schedule_mode_fixed_times">Fixed times</string>
+    <string name="water_reminder_interval_label">Reminder interval</string>
+    <string name="water_reminder_interval_picker_title">Select interval</string>
+    <string name="water_reminder_interval_minutes">%1$d minutes</string>
+    <string name="water_reminder_interval_hours">%1$d hours</string>
+    <string name="water_reminder_interval_hours_minutes">%1$d h %2$d min</string>
+    <string name="water_reminder_active_hours_label">Active hours</string>
+    <string name="water_reminder_active_hours_start_label">Start time</string>
+    <string name="water_reminder_active_hours_end_label">End time</string>
+    <string name="water_reminder_fixed_times_label">Reminder times</string>
+    <string name="water_reminder_add_time">Add time</string>
+    <string name="water_reminder_remove_time">Remove time</string>
+    <string name="water_reminder_daily_goal_label">Daily water goal (optional)</string>
+    <string name="water_reminder_daily_goal_ml">%1$d ml</string>
+    <string name="water_reminder_today_intake_label">Today\'s intake</string>
+    <string name="water_reminder_log_water_button">Log water</string>
+    <string name="water_reminder_error_interval_invalid">Enter an interval of at least 15 minutes.</string>
+    <string name="water_reminder_error_active_hours_invalid">End time must be after start time.</string>
+    <string name="water_reminder_error_fixed_times_empty">Add at least one reminder time.</string>
+    <string name="water_reminder_error_daily_goal_invalid">Daily goal must be a positive value.</string>
+
+    <!-- Medication list -->
+    <string name="medication_list_title">Medications</string>
+    <string name="medication_list_fab_label">Add medication</string>
+    <string name="medication_list_empty_state">No medications yet. Tap + to add your first reminder.</string>
+    <string name="medication_delete_confirm_title">Delete medication?</string>
+    <string name="medication_delete_confirm_message">Delete %1$s? This cannot be undone.</string>
+    <string name="medication_delete_confirm_delete">Delete</string>
+    <string name="medication_delete_confirm_cancel">Cancel</string>
+
+    <!-- Medication edit -->
+    <string name="medication_edit_title_create">Add medication</string>
+    <string name="medication_edit_title_edit">Edit medication</string>
+    <string name="medication_edit_name_label">Medication name</string>
+    <string name="medication_edit_dosage_label">Dosage (optional)</string>
+    <string name="medication_edit_enabled_label">Enable reminders</string>
+    <string name="medication_edit_repeat_days_label">Repeat on</string>
+    <string name="medication_day_mon">Mon</string>
+    <string name="medication_day_tue">Tue</string>
+    <string name="medication_day_wed">Wed</string>
+    <string name="medication_day_thu">Thu</string>
+    <string name="medication_day_fri">Fri</string>
+    <string name="medication_day_sat">Sat</string>
+    <string name="medication_day_sun">Sun</string>
+    <string name="medication_edit_times_label">Reminder times</string>
+    <string name="medication_edit_add_time">Add time</string>
+    <string name="medication_edit_remove_time">Remove time</string>
+    <string name="medication_edit_save">Save</string>
+    <string name="medication_edit_cancel">Cancel</string>
+    <string name="medication_edit_error_name_required">Enter a medication name.</string>
+    <string name="medication_edit_error_times_required">Add at least one reminder time.</string>
+    <string name="medication_edit_error_repeat_days_required">Select at least one day.</string>
+    <string name="medication_edit_error_duplicate_time">Each reminder time must be unique.</string>
 </resources>

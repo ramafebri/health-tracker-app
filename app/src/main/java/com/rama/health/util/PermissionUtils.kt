@@ -61,4 +61,8 @@ object PermissionUtils {
             Manifest.permission.POST_NOTIFICATIONS,
         )
     }
+
+    fun hasExactAlarmPermission(context: Context): Boolean {
+        return ExactAlarmUtils.canScheduleExactAlarms(context)
+    }
 }

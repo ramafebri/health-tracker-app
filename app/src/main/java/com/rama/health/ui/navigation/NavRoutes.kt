@@ -10,4 +10,14 @@ object NavRoutes {
     fun workoutDetail(workoutId: String): String = "workout_detail/$workoutId"
 
     const val WORKOUT_ID_ARG = "workoutId"
+
+    const val REMINDERS_HUB = "reminders_hub"
+    const val WATER_REMINDER = "water_reminder"
+    const val MEDICATION_LIST = "medication_list"
+    const val MEDICATION_EDIT = "medication_edit/{medicationId}"
+
+    fun medicationEdit(medicationId: String): String = "medication_edit/$medicationId"
+
+    const val MEDICATION_ID_ARG = "medicationId"
+    const val NEW_MEDICATION_ID = "new"
 }

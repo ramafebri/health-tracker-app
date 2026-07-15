@@ -26,11 +26,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.rama.health.R
 import com.rama.health.service.StepCounterService
 import com.rama.health.ui.dashboard.components.PermissionRequestCard
 import com.rama.health.ui.dashboard.components.StepCounterCard
@@ -42,6 +44,7 @@ fun DashboardScreen(
     viewModel: DashboardViewModel = hiltViewModel(),
     onNavigateToHistory: () -> Unit,
     onNavigateToWorkouts: () -> Unit,
+    onNavigateToReminders: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -89,6 +92,7 @@ fun DashboardScreen(
         onGoalChanged = viewModel::onGoalChanged,
         onNavigateToHistory = onNavigateToHistory,
         onNavigateToWorkouts = onNavigateToWorkouts,
+        onNavigateToReminders = onNavigateToReminders,
     )
 }
 
@@ -100,6 +104,7 @@ fun DashboardContent(
     onGoalChanged: (Int) -> Unit,
     onNavigateToHistory: () -> Unit,
     onNavigateToWorkouts: () -> Unit,
+    onNavigateToReminders: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var goalInput by remember(uiState.dailyGoal) { mutableStateOf(uiState.dailyGoal.toString()) }
@@ -166,6 +171,13 @@ fun DashboardContent(
             ) {
                 Text("Workout Logger")
             }
+
+            TextButton(
+                onClick = onNavigateToReminders,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.reminders_hub_title))
+            }
         }
     }
 }
@@ -186,6 +198,7 @@ private fun DashboardContentPreview() {
             onGoalChanged = {},
             onNavigateToHistory = {},
             onNavigateToWorkouts = {},
+            onNavigateToReminders = {},
         )
     }
 }
@@ -206,6 +219,7 @@ private fun DashboardContentPermissionsMissingPreview() {
             onGoalChanged = {},
             onNavigateToHistory = {},
             onNavigateToWorkouts = {},
+            onNavigateToReminders = {},
         )
     }
 }

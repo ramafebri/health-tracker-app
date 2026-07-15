@@ -2,7 +2,18 @@
 
 An Android step-counter and daily activity tracker. It runs a foreground
 service that reads the device's hardware step sensor, tracks progress toward
-a configurable daily step goal, and keeps a history of past days.
+a configurable daily step goal, and keeps a history of past days. It also
+includes GPS workout logging and medication / water reminders.
+
+## Screenshots
+
+| Dashboard | Step History | Water Reminders |
+| :---: | :---: | :---: |
+| ![Dashboard](ss/Screenshot_20260715_073426.png) | ![Step History](ss/Screenshot_20260715_073503.png) | ![Water Reminders](ss/Screenshot_20260715_073613.png) |
+
+| Edit Medication | Active Workout |
+| :---: | :---: |
+| ![Edit Medication](ss/Screenshot_20260715_073641.png) | ![Active Workout](ss/Screenshot_20260715_073703.png) |
 
 ## Architecture
 
